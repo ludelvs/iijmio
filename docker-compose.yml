@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  web:
+    container_name: iijmio-web
+    build:
+      context: ./etc/docker/web
+    ports:
+      - "19310:80"
+    env_file: .env
+    links:
+      - app
+    volumes:
+      - .:/var/www/html
+  app:
+    container_name: iijmio-app
+    build:
+      context: .
+      dockerfile: ./etc/docker/app/Dockerfile
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+    env_file: .env
+    links:
+      - db
+  db:
+    container_name: iijmio-db
+    image: mysql:5.7
+    ports:
+      - "33306:3306"
+    volumes:
+      - ./etc/docker/db:/db
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--skip-character-set-client-handshake'
+    ]
+    env_file: .env
+volumes:
+  vendor:
+    driver: 'local'
